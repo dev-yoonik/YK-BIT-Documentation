@@ -1,0 +1,251 @@
+swagger: '2.0'
+basePath: /v1.3/yoonik
+paths:
+  /bit/capture:
+    post:
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/capture_response'
+        '400':
+          description: BadRequest - Some field is missing or is invalid.
+        '401':
+          description: >-
+            Unauthorized - The request has not been applied because it lacks
+            valid authentication credentials for the target resource.
+        '500':
+          description: InternalServerError - An internal error occured
+        '501':
+          description: Not Implemented.
+      summary: Provide biometric capture capabilities using live capture from camera
+      operationId: post_capture_resource
+      parameters:
+        - name: payload
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/capture_request'
+      tags:
+        - BiT
+  /bit/verify:
+    post:
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/verify_response'
+        '400':
+          description: BadRequest - Some field is missing or is invalid.
+        '401':
+          description: >-
+            Unauthorized - The request has not been applied because it lacks
+            valid authentication credentials for the target resource.
+        '500':
+          description: InternalServerError - An internal error occured
+      summary: >-
+        Provide verification capabilities by comparing reference image with the
+        live capture from camera
+      operationId: post_verify_resource
+      parameters:
+        - name: payload
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/verify_request'
+      tags:
+        - BiT
+  /bit/verify_images:
+    post:
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/verify_images_response'
+        '400':
+          description: BadRequest - Some field is missing or is invalid.
+        '401':
+          description: >-
+            Unauthorized - The request has not been applied because it lacks
+            valid authentication credentials for the target resource.
+        '500':
+          description: InternalServerError - An internal error occured
+      summary: Perform face matching between 2 provided images
+      operationId: post_verify_images_resource
+      parameters:
+        - name: payload
+          required: true
+          in: body
+          schema:
+            $ref: '#/definitions/verify_images_request'
+      tags:
+        - BiT
+  /bit/status:
+    get:
+      responses:
+        '200':
+          description: System operational.
+        '503':
+          description: Camera unavailable.
+      summary: Check camera status
+      operationId: get_status_resource
+      tags:
+        - BiT
+info:
+  title: YooniK.Biometric in Things API
+  version: '1.3'
+  description: This is the documentation to integrate YooniK Biometric in Things edge software. The swagger describes the endpoints for integration for face capture, verification using a reference image or verification from two images. All images send to our local server are imediately discarded after processing.
+  termsOfService: www.yoonik.me/terms-and-conditions
+  contact:
+    name: YooniK Support
+    email: support@yoonik.me
+produces:
+  - application/json
+consumes:
+  - application/json
+tags:
+  - name: BiT
+    description: Biometric in Things control
+definitions:
+  verify_request:
+    type: object
+    properties:
+      capture_time_out:
+        type: number
+        format: float
+        default: 10
+        description: Capture timeout in seconds.
+      reference_image:
+        type: string
+        format: byte
+        description: >-
+          JPG base 64 string reference face image obtained from identification
+          document or any other source.
+      matching_score_threshold:
+        type: number
+        format: double
+        default: 0.4
+        description: >-
+          Matching score threshold used to verify matching between live and
+          reference image.
+      anti_spoofing:
+        type: boolean
+        default: true
+        description: Activate anti-spoofing detection.
+      live_quality_analysis:
+        type: boolean
+        default: false
+        description: >-
+          Activate ISO/ICAO-19794-5 face quality compliance checks on the live
+          face images.
+      reference_quality_analysis:
+        type: boolean
+        default: false
+        description: >-
+          Activate ISO/ICAO-19794-5 face quality compliance checks on the
+          reference_image.
+  verify_response:
+    type: object
+    properties:
+      matching_score:
+        type: number
+        format: double
+        description: >-
+          Face matching confidence. Varies between -1 (totally different) to 1
+          (totally equal). 
+      verified_image:
+        type: string
+        format: byte
+        description: JPG base 64 string thumbnail of the live matched image
+      verify_status:
+        type: array
+        description: Face verification status
+        items:
+          type: string
+          enum:
+            - matching_successful
+            - matching_failed
+            - capture_timedout
+            - camera_failed
+            - reference_face_detection_failed
+            - live_face_detection_failed
+            - liveness_detection_failed
+            - live_face_quality_failed
+            - reference_face_quality_failed
+  verify_images_request:
+    type: object
+    properties:
+      probe_image:
+        type: string
+        format: byte
+        description: JPG base 64 string face image to be matched against reference image.
+      reference_image:
+        type: string
+        format: byte
+        description: JPG base 64 string reference face image.
+      matching_score_threshold:
+        type: number
+        format: double
+        default: 0.4
+        description: >-
+          Matching score threshold used to verify matching between probe and
+          reference image.
+    required:
+      - probe_image
+      - reference_image
+  verify_images_response:
+    type: object
+    properties:
+      matching_score:
+        type: number
+        format: double
+        description: >-
+          Face matching confidence. Varies between -1 (totally different) to 1
+          (totally equal).
+      verify_images_status:
+        type: array
+        description: Face matching status
+        items:
+          type: string
+          enum:
+            - matching_successful
+            - matching_failed
+            - reference_face_detection_failed
+            - probe_face_detection_failed
+  capture_request:
+    type: object
+    properties:
+      capture_time_out:
+        type: number
+        format: float
+        default: 10
+        description: Capture timeout in seconds.
+      anti_spoofing:
+        type: boolean
+        default: true
+        description: Activate anti-spoofing detection.
+      live_quality_analysis:
+        type: boolean
+        default: false
+        description: >-
+          Activate ISO/ICAO-19794-5 face quality compliance checks on the live
+          face images.
+  capture_response:
+    type: object
+    properties:
+      image:
+        type: string
+        format: byte
+        description: JPG Base 64 string face crop according to ISO/ICAO 19794-5 Token.
+      capture_status:
+        type: array
+        description: Face capture result status
+        items:
+          type: string
+          enum:
+            - capture_successful
+            - capture_timedout
+            - camera_failed
+            - live_face_detection_failed
+            - live_face_quality_failed
+            - liveness_detection_failed
