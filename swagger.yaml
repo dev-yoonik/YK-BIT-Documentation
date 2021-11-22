@@ -106,7 +106,7 @@ info:
   title: YooniK.Biometric in Things API
   version: '1.3'
   description: This is the documentation to integrate YooniK Biometric in Things edge software. The swagger describes the endpoints for integration for face capture, verification using a reference image or verification from two images. All images send to our local server are imediately discarded after processing.
-  termsOfService: www.yoonik.me/terms-and-conditions
+  termsOfService: http://www.yoonik.me/terms-and-conditions
   contact:
     name: YooniK Support
     email: support@yoonik.me
