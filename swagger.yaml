@@ -91,6 +91,17 @@ paths:
       operationId: get_status_resource
       tags:
         - BiT
+  /bit/setup:
+    get:
+      responses:
+        '200':
+          description: Setup complete.
+        '500':
+          description: InternalServerError - An internal error occurred
+      summary: Perform BiT setup actions
+      operationId: get_setup_resource
+      tags:
+        - BiT
 info:
   title: YooniK.Biometric in Things API
   version: '1.3'
